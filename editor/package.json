@@ -1,0 +1,21 @@
+{
+  "name": "editor",
+  "version": "0.0.1",
+  "description": "skylark playground editor frontend",
+  "main": "\"\"",
+  "repository": "https://github.com/qri-io/skypg",
+  "author": "b5",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "css-loader": "^1.0.0",
+    "isomorphic-fetch": "^2.2.1",
+    "monaco-editor": "^0.14.3",
+    "monaco-editor-webpack-plugin": "^1.5.2",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.17.1"
+  },
+  "devDependencies": {
+    "webpack-command": "^0.4.1"
+  }
+}

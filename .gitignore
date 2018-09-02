@@ -1,0 +1,3 @@
+node_modules
+editor/dist/*.js
+coverage.txt
