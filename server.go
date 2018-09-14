@@ -3,17 +3,26 @@ package main
 
 import (
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/skylark"
+	"github.com/google/skylark/resolve"
 	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.New()
+
+func init() {
+	// hoist execution settings to resolve package settings
+	resolve.AllowFloat = true
+	resolve.AllowSet = true
+	resolve.AllowLambda = true
+	resolve.AllowNestedDef = true
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -33,6 +42,7 @@ func NewMux() *http.ServeMux {
 	m := http.NewServeMux()
 	m.Handle("/", LogRequest(HomeHandler))
 	m.Handle("/exec", LogRequest(ExecHandler))
+	m.Handle("/qri", LogRequest(ExecQriTransformHandler))
 	m.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("editor/dist"))))
 
 	return m
@@ -57,31 +67,38 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 //   * 400: script errors
 //   * 500: internal errors
 func ExecHandler(w http.ResponseWriter, r *http.Request) {
-	code, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	f, err := ioutil.TempFile("", "exec_skylark")
 	if err != nil {
-		log.Error(err)
+		log.Error(err.Error())
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	filename := filepath.Join(os.TempDir(), "exec.sky")
-	if err := ioutil.WriteFile(filename, code, os.ModePerm); err != nil {
+	defer os.Remove(f.Name())
+	if _, err := io.Copy(f, r.Body); err != nil {
 		log.Error(err.Error())
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
+	wrote := false
 	thread := &skylark.Thread{
 		// print func writes directly to the response writer
 		Print: func(thread *skylark.Thread, msg string) {
 			w.Write([]byte(msg))
+			wrote = true
 		},
 	}
 
-	if _, err = skylark.ExecFile(thread, filename, nil, nil); err != nil {
-		msg := strings.Replace(err.Error(), filename, "line", 1)
+	if _, err = skylark.ExecFile(thread, f.Name(), nil, nil); err != nil {
+		msg := strings.Replace(err.Error(), f.Name(), "line", 1)
 		writeError(w, http.StatusBadRequest, errors.New(msg))
 		return
+	}
+
+	if wrote == false {
+		w.Write([]byte("(no output)"))
 	}
 }
 
@@ -126,6 +143,14 @@ const tmpl = `<!DOCTYPE html>
 			cursor: pointer;
 			box-shadow: inset 0 -2px #2475ab;
 		}
+		#values {
+			flex: 1 1 60px;
+			width: 100%;
+		}
+		#values .config {
+			float: left;
+			width: 50%;
+		}
 		#editor {
 			flex: 1 1 50%;
 			min-height: 400px;
@@ -146,6 +171,18 @@ const tmpl = `<!DOCTYPE html>
 	<div style="padding:10px">
 		<button id="submit">Run</button>
 		<h3>Skylark Playground</h3>
+	</div>
+	<div id="values" style="padding:10px">
+		<div class="config">
+			<label>config</label>
+			<input id="config" name="config" type="text"></input>
+			<small><i>key,value,key,value,...</i></small>
+		</div>
+		<div class="secrets">
+			<label>secrets</label>
+			<input id="secrets" name="secrets" type="text"></input>
+			<small><i>key,value,key,value,...</i></small>
+		</div>
 	</div>
 	<div id="editor"></div>
 	<div id="output"></div>

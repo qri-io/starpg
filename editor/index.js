@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor'
 import 'isomorphic-fetch'
 
 const editor = monaco.editor.create(document.getElementById('editor'), {
@@ -9,20 +9,34 @@ const editor = monaco.editor.create(document.getElementById('editor'), {
     'print(oh_hai())'
   ].join('\n'),
   language: 'python'
-});
+})
 
-const output = document.getElementById("output")
+const output = document.getElementById('output')
+const config = document.getElementById('config')
+const secrets = document.getElementById('secrets')
 
 const submit = document.getElementById('submit')
-submit.addEventListener("pointerup", (e) => {
-   return fetch("/exec", {
-    method: "POST",
-    body: editor.getValue(),
+submit.addEventListener('pointerup', (e) => {
+  const params = {
+    'config': config.value,
+    'secrets': config.value
+  }
+
+  
+  const esc = encodeURIComponent
+  const query = Object.keys(params)
+  .map(k => esc(k) + '=' + esc(params[k]))
+  .join('&')
+  
+  console.log(params, query)
+  return fetch('/qri?' + query, {
+    method: 'POST',
+    body: editor.getValue()
   })
     .then(response => {
-        output.setAttribute("class", response.ok ? "result" : "error")
-        return response.text()
+      output.setAttribute('class', response.ok ? 'result' : 'error')
+      return response.text()
     }).then((text) => {
-        output.innerText = text
+      output.innerText = text
     })
 })
