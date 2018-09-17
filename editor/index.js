@@ -8,7 +8,8 @@ const editor = monaco.editor.create(document.getElementById('editor'), {
     '',
     'print(oh_hai())'
   ].join('\n'),
-  language: 'python'
+  language: 'python',
+  minimap: false
 })
 
 const output = document.getElementById('output')
@@ -17,18 +18,17 @@ const secrets = document.getElementById('secrets')
 
 const submit = document.getElementById('submit')
 submit.addEventListener('pointerup', (e) => {
+  output.innerText = ""
   const params = {
     'config': config.value,
-    'secrets': config.value
+    'secrets': secrets.value
   }
-
   
   const esc = encodeURIComponent
   const query = Object.keys(params)
   .map(k => esc(k) + '=' + esc(params[k]))
   .join('&')
   
-  console.log(params, query)
   return fetch('/qri?' + query, {
     method: 'POST',
     body: editor.getValue()

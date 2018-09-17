@@ -144,21 +144,25 @@ const tmpl = `<!DOCTYPE html>
 			box-shadow: inset 0 -2px #2475ab;
 		}
 		#values {
-			flex: 1 1 60px;
+			flex: 1 3 30px;
 			width: 100%;
 		}
 		#values .config {
 			float: left;
 			width: 50%;
 		}
-		#editor {
-			flex: 1 1 50%;
-			min-height: 400px;
+		#panes {
+			flex: 3 3 80%;
 			width: 100%;
+			overflow: hidden;
+			display: flex;
+		}
+		#editor {
+			flex: 1 1 60%;
+			min-height: 400px;
 		}
 		#output {
-			width: 100%;
-			flex: 1 2 300px;
+			flex: 1 2 40%;
 			padding: 25px 20px;
 			overflow-y: auto;
 			background: #f2f2f2;
@@ -170,7 +174,7 @@ const tmpl = `<!DOCTYPE html>
 <body>
 	<div style="padding:10px">
 		<button id="submit">Run</button>
-		<h3>Skylark Playground</h3>
+		<h3>Qri Skylark Playground</h3>
 	</div>
 	<div id="values" style="padding:10px">
 		<div class="config">
@@ -184,8 +188,10 @@ const tmpl = `<!DOCTYPE html>
 			<small><i>key,value,key,value,...</i></small>
 		</div>
 	</div>
-	<div id="editor"></div>
-	<div id="output"></div>
+	<div id="panes">
+		<div id="editor"></div>
+		<div id="output"></div>
+	</div>
 
 	<script src="/js/app.js"></script>
 </body>
