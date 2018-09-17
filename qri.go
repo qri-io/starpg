@@ -91,6 +91,7 @@ func ExecQriTransformHandler(w http.ResponseWriter, r *http.Request) {
 		Transform: &dataset.TransformPod{
 			ScriptPath: f.Name(),
 		},
+		Meta: &dataset.Meta{},
 	}
 
 	if str := r.FormValue("secrets"); str != "" {
