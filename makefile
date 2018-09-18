@@ -1,5 +1,5 @@
 .PHONY : editor-install-deps editor-build install-deps start
-GOPACKAGES = github.com/google/skylark github.com/sirupsen/logrus
+GOPACKAGES = github.com/qri-io/qri github.com/google/skylark github.com/sirupsen/logrus
 
 default: editor-install-deps editor-build install-deps start
 

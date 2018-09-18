@@ -8,13 +8,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
-	"github.com/qri-io/dataset"
-
 	"github.com/libp2p/go-libp2p-crypto"
 	"github.com/qri-io/cafs"
+	"github.com/qri-io/dataset"
+	"github.com/qri-io/dataset/dstest"
+	"github.com/qri-io/ioes"
 	"github.com/qri-io/qri/actions"
 	"github.com/qri-io/qri/config"
 	"github.com/qri-io/qri/p2p"
@@ -56,6 +58,18 @@ func init() {
 		panic(err)
 	}
 
+	tc, err := dstest.NewTestCaseFromDir(testdataPath("cities"))
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err := actions.CreateDataset(node, tc.Name, tc.Input, tc.BodyFile(), nil, true); err != nil {
+		panic(err)
+	}
+}
+
+func testdataPath(path string) string {
+	return filepath.Join(os.Getenv("GOPATH"), "/src/github.com/qri-io/qri/repo/test/testdata", path)
 }
 
 // ExecQriTransformHandler executes a qri transform in memory
@@ -67,7 +81,7 @@ func ExecQriTransformHandler(w http.ResponseWriter, r *http.Request) {
 	nodeLock.Lock()
 	defer nodeLock.Unlock()
 
-	node.LocalStreams = p2p.IOStreams{Out: w, ErrOut: w}
+	node.LocalStreams = ioes.NewIOStreams(nil, w, w)
 
 	f, err := ioutil.TempFile("", "exec_skylark")
 	if err != nil {
@@ -126,7 +140,7 @@ func ExecQriTransformHandler(w http.ResponseWriter, r *http.Request) {
 
 	ref, err := actions.CreateDataset(node, "test_dataset", ds, body, secrets, false)
 	if err != nil {
-		err = fmt.Errorf(strings.Replace(err.Error(), f.Name(), "line", 1))
+		err = fmt.Errorf(strings.Replace(err.Error(), f.Name(), "line", -1))
 		log.Error(err.Error())
 		writeError(w, http.StatusInternalServerError, err)
 		return
