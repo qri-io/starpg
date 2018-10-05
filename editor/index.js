@@ -13,23 +13,12 @@ const editor = monaco.editor.create(document.getElementById('editor'), {
 })
 
 const output = document.getElementById('output')
-const config = document.getElementById('config')
-const secrets = document.getElementById('secrets')
 
 const submit = document.getElementById('submit')
 submit.addEventListener('pointerup', (e) => {
-  output.innerText = ""
-  const params = {
-    'config': config.value,
-    'secrets': secrets.value
-  }
-  
-  const esc = encodeURIComponent
-  const query = Object.keys(params)
-  .map(k => esc(k) + '=' + esc(params[k]))
-  .join('&')
-  
-  return fetch('/qri?' + query, {
+  output.innerText = ''
+
+  return fetch('/exec?', {
     method: 'POST',
     body: editor.getValue()
   })
