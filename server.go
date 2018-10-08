@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/skylark"
 	"github.com/google/skylark/resolve"
+	"github.com/qri-io/starlib"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,7 +43,6 @@ func NewMux() *http.ServeMux {
 	m := http.NewServeMux()
 	m.Handle("/", LogRequest(HomeHandler))
 	m.Handle("/exec", LogRequest(ExecHandler))
-	m.Handle("/qri", LogRequest(ExecQriTransformHandler))
 	m.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("editor/dist"))))
 
 	return m
@@ -89,6 +89,7 @@ func ExecHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(msg))
 			wrote = true
 		},
+		Load: starlib.Loader,
 	}
 
 	if _, err = skylark.ExecFile(thread, f.Name(), nil, nil); err != nil {
@@ -114,7 +115,7 @@ const tmpl = `<!DOCTYPE html>
 <head>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Skylark Playground</title>
+	<title>Starlark Playground</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
 		* {
@@ -127,6 +128,11 @@ const tmpl = `<!DOCTYPE html>
 			font-family: "avenir-next", helvetica, sans-serif;
 			display: flex;
 			flex-direction: column;
+		}
+		#topbar {
+			padding:10px;
+			box-shadow: 0 0 2px rgba(0,0,0,0.2);
+			z-index: 10;
 		}
 		#submit {
 			float: right;
@@ -142,14 +148,6 @@ const tmpl = `<!DOCTYPE html>
 			border-bottom: 2px solid #2475ab;
 			cursor: pointer;
 			box-shadow: inset 0 -2px #2475ab;
-		}
-		#values {
-			flex: 1 3 30px;
-			width: 100%;
-		}
-		#values .config {
-			float: left;
-			width: 50%;
 		}
 		#panes {
 			flex: 3 3 80%;
@@ -172,21 +170,9 @@ const tmpl = `<!DOCTYPE html>
 	</style>
 </head>
 <body>
-	<div style="padding:10px">
+	<div id="topbar">
 		<button id="submit">Run</button>
-		<h3>Qri Skylark Playground</h3>
-	</div>
-	<div id="values" style="padding:10px">
-		<div class="config">
-			<label>config</label>
-			<input id="config" name="config" type="text"></input>
-			<small><i>key,value,key,value,...</i></small>
-		</div>
-		<div class="secrets">
-			<label>secrets</label>
-			<input id="secrets" name="secrets" type="text"></input>
-			<small><i>key,value,key,value,...</i></small>
-		</div>
+		<h3>Starlark Playground</h3>
 	</div>
 	<div id="panes">
 		<div id="editor"></div>
