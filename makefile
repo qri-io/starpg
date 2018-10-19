@@ -18,4 +18,4 @@ install-deps:
 
 start:
 	@echo "\nstart service\n"
-	go install && skypg
+	go install && starpg

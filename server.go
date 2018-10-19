@@ -1,4 +1,4 @@
-// Package skypg is a web-based skylark playground
+// Package skypg is a web-based starlark playground
 package main
 
 import (
@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/skylark"
+	starlark "github.com/google/skylark"
 	"github.com/google/skylark/resolve"
 	"github.com/qri-io/starlib"
 	"github.com/sirupsen/logrus"
@@ -61,7 +61,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(tmpl))
 }
 
-// ExecHandler assumes the request body is a skylark script to be executed
+// ExecHandler assumes the request body is a starlark script to be executed
 // currently no loader is provided, so all code must be defined inline
 // errors are reported via HTTP response codes:
 //   * 400: script errors
@@ -69,7 +69,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 func ExecHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	f, err := ioutil.TempFile("", "exec_skylark")
+	f, err := ioutil.TempFile("", "exec_starlark")
 	if err != nil {
 		log.Error(err.Error())
 		writeError(w, http.StatusInternalServerError, err)
@@ -83,16 +83,16 @@ func ExecHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wrote := false
-	thread := &skylark.Thread{
+	thread := &starlark.Thread{
 		// print func writes directly to the response writer
-		Print: func(thread *skylark.Thread, msg string) {
+		Print: func(thread *starlark.Thread, msg string) {
 			w.Write([]byte(msg))
 			wrote = true
 		},
 		Load: starlib.Loader,
 	}
 
-	if _, err = skylark.ExecFile(thread, f.Name(), nil, nil); err != nil {
+	if _, err = starlark.ExecFile(thread, f.Name(), nil, nil); err != nil {
 		msg := strings.Replace(err.Error(), f.Name(), "line", 1)
 		writeError(w, http.StatusBadRequest, errors.New(msg))
 		return
