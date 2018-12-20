@@ -1,5 +1,5 @@
 .PHONY : editor-install-deps editor-build install-deps start
-GOPACKAGES = github.com/qri-io/qri github.com/google/skylark github.com/sirupsen/logrus github.com/qri-io/starlib
+GOPACKAGES = go.starlark.net/starlark github.com/sirupsen/logrus github.com/qri-io/starlib
 
 default: editor-install-deps editor-build install-deps start
 

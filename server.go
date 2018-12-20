@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	starlark "github.com/google/skylark"
-	"github.com/google/skylark/resolve"
 	"github.com/qri-io/starlib"
 	"github.com/sirupsen/logrus"
+	"go.starlark.net/resolve"
+	"go.starlark.net/starlark"
 )
 
 var log = logrus.New()
