@@ -19,3 +19,6 @@ install-deps:
 start:
 	@echo "\nstart service\n"
 	go install && starpg
+
+update-changelog:
+	conventional-changelog -p angular -i CHANGELOG.md -s
