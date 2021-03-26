@@ -12,6 +12,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.1.1 // indirect
 	go.starlark.net v0.0.0-20210312235212-74c10e2c17dc
-	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
+	golang.org/x/net v0.0.0-20210326060303-6b1517762897 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
