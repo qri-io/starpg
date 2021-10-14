@@ -19,10 +19,9 @@ var log = logrus.New()
 
 func init() {
 	// hoist execution settings to resolve package settings
-	resolve.AllowFloat = true
 	resolve.AllowSet = true
-	resolve.AllowLambda = true
-	resolve.AllowNestedDef = true
+	resolve.AllowGlobalReassign = true
+	resolve.AllowRecursion = true
 }
 
 func main() {
