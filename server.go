@@ -86,7 +86,7 @@ func ExecHandler(w http.ResponseWriter, r *http.Request) {
 	thread := &starlark.Thread{
 		// print func writes directly to the response writer
 		Print: func(thread *starlark.Thread, msg string) {
-			w.Write([]byte(msg))
+			w.Write([]byte(msg + "\n"))
 			wrote = true
 		},
 		Load: starlib.Loader,
